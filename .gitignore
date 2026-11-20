@@ -1,0 +1,22 @@
+# Segredos e variáveis de ambiente
+.env
+.env.*
+
+# Datasets brutos, logs e checkpoints (nunca subir reviews reais)
+*.parquet
+*.jsonl
+data/
+checkpoint/
+checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Sistema / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
