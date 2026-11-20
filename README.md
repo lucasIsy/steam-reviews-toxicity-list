@@ -40,6 +40,24 @@ Sending raw user-generated content (UGC) straight to LLM APIs exposes production
 
 ---
 
+## How It Works
+
+The input can be anything from a **single review** to a **massive dataset** (hundreds of thousands or millions of Steam reviews). The filtering algorithm is completely up to you — regex, Aho-Corasick, Polars, DuckDB, Spark, or a lightweight local model.
+
+```mermaid
+flowchart LR
+    A["Input<br/>Single review or<br/>massive dataset"] --> B["Local Filter Engine<br/>(your algorithm +<br/>lists/lista_tos.csv)"]
+    B -- "Matches TOS term<br/>(remover)" --> C["Dropped Locally<br/>Zero API calls · Zero HTTP 400"]
+    B -- "Clean" --> D["LLM / Decision Model<br/>(Gemini, OpenAI, etc.)"]
+```
+
+### Architecture Note & Trade-off (Why `remover`?)
+
+- **Reference Engine (Polars + Compiled Word-Boundary Regex):** In our reference pipeline, we run a deterministic local pre-filter in **Polars** designed for **ultra-fast throughput on CPU** (capable of filtering hundreds of thousands of reviews in seconds before any API call).
+- **The Filtering Trade-off:** Past a certain point, trying to mask, censor, or sanitize severely toxic text with local string rules yields diminishing returns — the text loses analytical value and can still trigger LLM safety blocks. In practice, the best trade-off is to **drop (`remover`) high-risk TOS cases locally** at near-zero cost and let the **LLM / decision model** handle nuanced evaluation on the remaining clean data (reserving light censorship only for milder cases if needed).
+
+---
+
 ## Repository Structure
 
 ```text

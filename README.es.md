@@ -40,6 +40,24 @@ Al enviar grandes volúmenes de contenido generado por usuarios (UGC) directamen
 
 ---
 
+## Cómo Funciona
+
+La entrada puede ser desde una **sola reseña** hasta un **dataset masivo** (cientos de miles o millones de reseñas de Steam). El algoritmo de filtrado queda totalmente a elección de quien lo integre — Regex, Aho-Corasick, Polars, DuckDB, Spark o incluso un modelo local ligero.
+
+```mermaid
+flowchart LR
+    A["Entrada<br/>1 reseña o<br/>dataset masivo"] --> B["Motor de Filtrado Local<br/>(tu algoritmo +<br/>lists/lista_tos.csv)"]
+    B -- "Coincide término TOS<br/>(remover)" --> C["Descartado Localmente<br/>Cero llamadas · Cero HTTP 400"]
+    B -- "Limpio" --> D["LLM / IA de Decisión<br/>(Gemini, OpenAI, etc.)"]
+```
+
+### Nota de Arquitectura y Trade-off (¿Por qué `remover`?)
+
+- **Motor de Referencia (Pre-Filtro Determinista en Polars + Regex):** en el pipeline original de este proyecto usamos un motor determinista en **Polars** con Regex compilada con límites de palabra (`\b`), diseñado para ser **ultraeficiente y rápido en CPU** (filtrando cientos de miles de reseñas en pocos segundos antes de tocar la API).
+- **El Trade-off del Filtrado:** llega un punto en el que intentar censurar o limpiar caracteres de textos gravemente tóxicos localmente aporta poco beneficio — suelen perder valor analítico y aun así pueden activar bloqueos de TOS. A escala, el mejor trade-off es **eliminar rápidamente los casos severos en la capa local** y enviar el resto limpio a la **IA de decisión** para evaluarlo con contexto (reservando la censura ligera solo para casos más leves si es necesario).
+
+---
+
 ## Estructura del Proyecto
 
 ```text
