@@ -1,73 +1,93 @@
-# Steam Reviews Toxicity List
+<div align="center">
 
-> **Aviso de Conteúdo (Content Warning):** Este repositório contém termos ofensivos, discurso de ódio e linguagem sexual explícita listados **estritamente para fins defensivos de moderação de conteúdo, pesquisa de segurança e filtragem pré-LLM**. O projeto não endossa nenhum termo listado e não deve ser utilizado para assédio ou geração de conteúdo abusivo.
+<p>
+  <strong>English</strong> ·
+  <a href="README.pt.md">Português</a> ·
+  <a href="README.es.md">Español</a>
+</p>
+
+# 🛡️ Steam Reviews Toxicity List
+
+**A multilingual profanity & TOS-violation wordlist curated from Steam reviews to shield your LLM pipelines before inference.**
+
+<p>
+  <img src="https://img.shields.io/badge/Languages-EN%20%7C%20PT%20%7C%20ES-blue" alt="Languages: EN | PT | ES" />
+  <img src="https://img.shields.io/badge/Focus-LLM%20TOS%20Shield-purple" alt="Focus: LLM TOS Shield" />
+  <img src="https://img.shields.io/badge/Action-Remove-red" alt="Action: Remove" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT" /></a>
+</p>
+
+</div>
+
+> **Content Warning:** This repository contains offensive terms, hate speech, and sexually explicit language listed **strictly for defensive content moderation, safety research, and pre-LLM filtering**. This project does not endorse any listed term and must not be used for harassment or abusive content generation.
 >
-> *Projeto independente e open source, sem afiliação com Valve/Steam, Google, OpenAI, Anthropic ou qualquer provedor de IA.*
-
-Lista colaborativa e multilíngue de termos críticos de toxicidade e **Violação de Termos de Serviço (TOS)** encontrados em **reviews da Steam**, criada para **blindar pipelines de texto antes da inferência em LLMs**.
+> *Independent open-source project, not affiliated with Valve/Steam, Google, OpenAI, Anthropic, or any AI provider.*
 
 ---
 
-## Objetivo
+## Objective
 
-Atuar como uma **camada local e determinística de blindagem pré-inferência**, identificando e removendo textos nocivos (reviews, comentários, chats, tickets) **antes** que sejam enviados para APIs de LLMs com políticas de segurança estritas — como **Google Gemini** (incluindo modelos da família `gemini-decision`), **OpenAI**, entre outros.
+Act as a **local, deterministic pre-inference shield** that detects and removes severe toxic user-generated text (Steam reviews, comments, chats, tickets) **before** it touches commercial LLM APIs with strict Terms of Service — such as **Google Gemini** (including `gemini-decision` models), **OpenAI**, and others.
 
-### Problemas e riscos que este projeto resolve
+### Problems and Risks Solved
 
-Ao processar grandes volumes de texto gerado por usuários (UGC) diretamente em LLMs comerciais, você fica exposto a riscos operacionais e de conta:
+Sending raw user-generated content (UGC) straight to LLM APIs exposes production pipelines to serious operational and account risks:
 
-- **Bloqueios HTTP 400 (`PROHIBITED_CONTENT` / `TOS Violation`):** textos com conteúdo extremo são rejeitados na entrada, quebrando pipelines em lote, interrompendo filas e gerando retries inúteis.
-- **Risco de restrição, suspensão ou banimento do projeto/conta:** o envio recorrente de conteúdo que viola os Termos de Serviço pode acionar sistemas automáticos de prevenção a abuso do provedor, resultando em **limitação de cota, bloqueio da API key, suspensão do projeto ou banimento permanente da conta**.
-- **Desperdício de custo e latência:** enviar textos inevitavelmente bloqueáveis consome tempo de processamento e aumenta o risco de falhas em cascata.
-- **Falsos positivos de listas genéricas:** muitas listas públicas bloqueiam palavras comuns de jogos ou uso coloquial (como `die`, `morrer`, `aviso`, `caralho`). Aqui, a lista de TOS foca **apenas em termos de alto risco real**, deixando termos leves ou contextuais para camadas de censura separadas.
+- **HTTP 400 Blocks (`PROHIBITED_CONTENT` / `TOS Violation`):** extreme content gets rejected at the gateway, breaking batch pipelines, stalling queues, and wasting retries.
+- **Account Restriction, Suspension, or Ban Risk:** repeatedly sending severe TOS-violating text can trigger automated abuse-prevention systems at the LLM provider, leading to **rate throttling, API key revocation, project suspension, or permanent account bans**.
+- **Wasted Latency & Cost:** paying tokens and network round-trips for text that will inevitably be blocked or offers no analytical value.
+- **High False Positives from Generic Wordlists:** many public lists block common gaming/colloquial words (such as `die`, `morrer`, `aviso`, `caralho`). This TOS list focuses **strictly on high-risk terms**, leaving milder or context-dependent words for separate censorship layers.
 
 ---
 
-## Estrutura do Projeto
+## Repository Structure
 
 ```text
 ├── lists/
 │   ├── tos/
-│   │   ├── pt.csv          # Termos em Português
-│   │   ├── en.csv          # Termos em Inglês
-│   │   └── es.csv          # Termos em Espanhol
-│   └── lista_tos.csv       # Lista consolidada (gerada a partir de lists/tos/*.csv)
+│   │   ├── en.csv          # English terms
+│   │   ├── pt.csv          # Portuguese terms
+│   │   └── es.csv          # Spanish terms
+│   └── lista_tos.csv       # Consolidated list (built from lists/tos/*.csv)
 ├── scripts/
 │   └── build_and_validate.py
 ├── .github/workflows/
-│   └── validate.yml        # Validação automática em Pull Requests
+│   └── validate.yml        # Automated CI validation on Pull Requests
+├── README.md               # English
+├── README.pt.md            # Português
+├── README.es.md            # Español
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 └── LICENSE
 ```
 
-Cada idioma possui seu próprio CSV em `lists/tos/` para facilitar revisões e contribuições focadas por falantes nativos. O arquivo `lists/lista_tos.csv` reúne automaticamente todos os idiomas.
+Each language has its own CSV under `lists/tos/` so native speakers can review and contribute easily. `lists/lista_tos.csv` automatically consolidates all languages.
 
 ---
 
-## Esquema das Colunas
+## Column Schema
 
-Todos os arquivos CSV seguem exatamente o mesmo padrão UTF-8 com 5 colunas:
+All CSV files use UTF-8 encoding and share the exact same 5-column schema:
 
-| Coluna | Obrigatória | Descrição | Valores esperados |
+| Column | Required | Description | Expected Values |
 | :--- | :---: | :--- | :--- |
-| `termo` | Sim | Palavra ou expressão exata (em minúsculas) a ser bloqueada antes da inferência. | Ex.: `nigger`, `gay sex`, `bater em mulher` |
-| `classificacao` | Sim | Ação recomendada para o filtro local. Na lista de TOS, **todos os termos devem ser `remover`** (descartar/barrar o texto antes da API). | `remover` |
-| `linguagem` | Sim | Código ISO 639-1 do idioma do termo. Deve corresponder ao nome do arquivo em `lists/tos/<linguagem>.csv`. | `pt`, `en`, `es`, `fr`, `de`, etc. |
-| `motivo` | Sim | Motivo técnico pelo qual o termo está na lista. | `TOS Violation` |
-| `categoria` | Sim | Categoria de violação de política associada ao termo. | `Discurso de ódio (Racismo)`, `Discurso de ódio (Homofobia)`, `Discurso de ódio (Capacitismo)`, `Violência / Discurso de ódio (Misoginia)`, `Conteúdo sexual explícito`, `Ameaça / Violência` |
+| `termo` | Yes | Exact lowercase word or phrase to block before inference. | e.g. `nigger`, `gay sex`, `beat women` |
+| `classificacao` | Yes | Recommended action for the local filter. In the TOS list, **every entry must be `remover`** (drop/block the text before calling the API). | `remover` |
+| `linguagem` | Yes | ISO 639-1 language code. Must match the filename `lists/tos/<linguagem>.csv`. | `en`, `pt`, `es`, `fr`, `de`, etc. |
+| `motivo` | Yes | Technical reason the term is included. | `TOS Violation` |
+| `categoria` | Yes | Policy violation category associated with the term. | `Discurso de ódio (Racismo)`, `Discurso de ódio (Homofobia)`, `Discurso de ódio (Capacitismo)`, `Violência / Discurso de ódio (Misoginia)`, `Conteúdo sexual explícito`, `Ameaça / Violência` |
 
 ---
 
-## Validação e Build Local
+## Local Validation & Build
 
-Após editar qualquer arquivo em `lists/tos/`, execute o script para validar o formato e regerar `lists/lista_tos.csv`:
+After editing any file in `lists/tos/`, run the script to validate all entries and rebuild `lists/lista_tos.csv`:
 
 ```bash
 python scripts/build_and_validate.py
 ```
 
-Para apenas validar sem modificar arquivos (mesmo comando usado no CI):
+To validate without modifying files (same check executed in CI):
 
 ```bash
 python scripts/build_and_validate.py --check
@@ -75,19 +95,19 @@ python scripts/build_and_validate.py --check
 
 ---
 
-## Colabore com o Projeto
+## Contribute
 
-A linguagem na internet muda rápido e cada idioma tem suas próprias gírias, variações e formas de evasão. **Sua contribuição ajuda toda a comunidade a manter pipelines de IA mais seguros e estáveis.**
+Internet slang evolves fast, and every language has its own variations and evasion patterns. **Your contribution helps the community keep AI pipelines safer and more reliable.**
 
-Você pode contribuir de três formas:
-1. **Adicionando novos termos** em um idioma existente (`lists/tos/pt.csv`, `en.csv`, `es.csv`).
-2. **Criando suporte a um novo idioma** adicionando um arquivo `lists/tos/<codigo_iso>.csv` (ex.: `fr.csv`, `de.csv`, `it.csv`).
-3. **Reportando falsos positivos** via Issue caso algum termo esteja barrando textos legítimos.
+You can help in three ways:
+1. **Add new terms** to an existing language (`lists/tos/en.csv`, `pt.csv`, `es.csv`).
+2. **Add a new language** by creating `lists/tos/<iso_code>.csv` (e.g., `fr.csv`, `de.csv`, `it.csv`).
+3. **Report false positives** via Issues if any term blocks legitimate game reviews.
 
-Leia o guia rápido em [CONTRIBUTING.md](CONTRIBUTING.md) antes de abrir seu Pull Request.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a Pull Request.
 
 ---
 
-## Licença
+## License
 
-Distribuído sob a licença [MIT](LICENSE).
+Distributed under the [MIT License](LICENSE).
